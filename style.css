@@ -1,0 +1,40 @@
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  height: 100vh;
+  margin: 0;
+}
+
+h1 {
+  color: #333333;
+  margin-bottom: 20px;
+}
+
+#timer {
+  font-size: 48px;
+  color: #333333;
+  margin: auto;
+  margin-top: auto;
+  margin-bottom: 20px;
+  transform: translateY(-50%);
+}
+
+
+
+#status {
+  font-size: 24px;
+  color: #777777;
+  margin-bottom: 20px;
+}
+
+#status .label {
+  font-weight: bold;
+}
+
+#status .value {
+  font-style: italic;
+}
