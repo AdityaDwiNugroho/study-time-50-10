@@ -3,35 +3,71 @@
 <head>
   <title>Waktu Belajar dan Istirahat</title>
   <script type="text/javascript">
-    function countdown(minutes) {
-      var seconds = 60;
-      var mins = minutes;
+    function startCountdown() {
+      var d = new Date();
+      var minutes = d.getMinutes();
+      var seconds = d.getSeconds();
 
-      function tick() {
-        var counter = document.getElementById("timer");
-        var current_minutes = mins - 1;
-        seconds--;
+      if (minutes >= 1 && minutes <= 50) {
+        // Waktu belajar
+        var remainingMinutes = 50 - minutes;
+        var remainingSeconds = 60 - seconds;
 
-        counter.innerHTML = (current_minutes < 10 ? "0" : "") + current_minutes.toString() + ":" + (seconds < 10 ? "0" : "") + String(seconds);
+        // Tampilkan waktu belajar
+        document.getElementById("timer").innerHTML = (remainingMinutes < 10 ? "0" : "") + remainingMinutes.toString() + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds.toString();
+        document.getElementById("status").innerHTML = "Belajar";
 
-        if (seconds > 0) {
-          setTimeout(tick, 1000);
-        } else {
-          if (mins > 1) {
-            countdown(mins - 1);
-          } else {
-            // Setelah 50 menit belajar, lanjutkan dengan 10 menit istirahat
-            countdown(10);
-          }
-        }
+        setTimeout(startCountdown, 1000);
+      } else {
+        // Waktu istirahat
+        var remainingMinutes = (minutes > 50 ? 60 - minutes : 10);
+        var remainingSeconds = 60 - seconds;
+
+        // Tampilkan waktu istirahat
+        document.getElementById("timer").innerHTML = (remainingMinutes < 10 ? "0" : "") + remainingMinutes.toString() + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds.toString();
+        document.getElementById("status").innerHTML = "Istirahat";
+
+        setTimeout(startCountdown, 1000);
       }
-
-      tick();
     }
   </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f2f2f2;
+    }
+
+    h1 {
+      color: #333333;
+    }
+
+    #timer {
+      font-size: 48px;
+      color: #333333;
+      margin: 20px 0;
+    }
+
+    #status {
+      font-size: 24px;
+      color: #777777;
+      margin-bottom: 20px;
+    }
+
+    #status .label {
+      font-weight: bold;
+    }
+
+    #status .value {
+      font-style: italic;
+    }
+  </style>
+  <script type="text/javascript">
+    // ... your JavaScript code ...
+  </script>
 </head>
-<body onload="countdown(50);">
-  <h1>Waktu Belajar dan Istirahat</h1>
-  <div id="timer">50:00</div>
-</body>
+<body onload="startCountdown();">
+    <h1>Waktu Belajar dan Istirahat</h1>
+    <div id="timer">50:00</div>
+    <div id="status"><span class="label">Status:</span> <span class="value">Belajar</span></div>
 </html>
