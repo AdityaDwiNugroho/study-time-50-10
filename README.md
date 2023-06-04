@@ -4,7 +4,7 @@ Waktu belajar yang dilakukan setiap jam dengan waktu 50 menit belajar dan 10 men
 
 
 <b>Waktu Belajar dan Istirahat</b>
-Waktu Belajar dan Istirahat
+
 
 Ini adalah proyek sederhana yang menggambarkan waktu belajar dan istirahat. Dalam proyek ini, kita menggunakan HTML, CSS, dan JavaScript untuk menampilkan waktu yang tersisa dalam mode belajar dan mode istirahat.
 
@@ -15,7 +15,9 @@ Fitur
 Tampilan yang sederhana dan mudah dibaca.
 Menghitung waktu belajar selama 50 menit dan waktu istirahat selama 10 menit.
 Memperbarui secara otomatis setiap detik.
+
 Pratinjau
+https://htmlpreview.github.io/?https://github.com/AdityaDwiNugroho/study-time-50-10/blob/main/index.html
 Pratinjau
 
 Kontribusi
