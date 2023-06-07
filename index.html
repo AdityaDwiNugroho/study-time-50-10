@@ -10,21 +10,17 @@
       var seconds = d.getSeconds();
 
       if (minutes >= 1 && minutes <= 50) {
-        // Waktu belajar
         var remainingMinutes = 50 - minutes;
         var remainingSeconds = 60 - seconds;
 
-        // Tampilkan waktu belajar
         document.getElementById("timer").innerHTML = (remainingMinutes < 10 ? "0" : "") + remainingMinutes.toString() + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds.toString();
         document.getElementById("status").innerHTML = "Belajar";
 
         setTimeout(startCountdown, 1000);
       } else {
-        // Waktu istirahat
         var remainingMinutes = (minutes > 50 ? 60 - minutes : 10);
         var remainingSeconds = 60 - seconds;
 
-        // Tampilkan waktu istirahat
         document.getElementById("timer").innerHTML = (remainingMinutes < 10 ? "0" : "") + remainingMinutes.toString() + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds.toString();
         document.getElementById("status").innerHTML = "Istirahat";
 
