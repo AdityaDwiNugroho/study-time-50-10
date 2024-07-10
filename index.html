@@ -4,34 +4,277 @@
   <title>Waktu Belajar dan Istirahat</title>
   <link rel="stylesheet" href="style.css">
   <script type="text/javascript">
-    function startCountdown() {
-      var d = new Date();
-      var minutes = d.getMinutes();
-      var seconds = d.getSeconds();
+    let isPaused = false;
+    let isStudyTime = true;
+    let studyMinutes = 50;
+    let breakMinutes = 10;
+    let totalStudyTime = studyMinutes * 60;
+    let totalBreakTime = breakMinutes * 60;
+    let remainingTime = totalStudyTime;
+    let sessionCounter = 0;
+    let streakCounter = 0;
+    let volume = 1.0;
+    let pomodoroMode = false;
+    let weeklyGoal = 0;
+    let sessionsThisWeek = 0;
 
-      if (minutes >= 1 && minutes <= 50) {
-        var remainingMinutes = 50 - minutes;
-        var remainingSeconds = 60 - seconds;
+    const quotes = [
+      "Stay positive, work hard, make it happen.",
+      "Don't watch the clock; do what it does. Keep going.",
+      "The secret of getting ahead is getting started.",
+      "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+      "Believe you can and you're halfway there."
+    ];
 
-        document.getElementById("timer").innerHTML = (remainingMinutes < 10 ? "0" : "") + remainingMinutes.toString() + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds.toString();
-        document.getElementById("status").innerHTML = "Belajar";
+    const breakSuggestions = [
+      "Take a short walk",
+      "Do some stretches",
+      "Drink some water",
+      "Meditate for a few minutes",
+      "Listen to your favorite song"
+    ];
 
-        setTimeout(startCountdown, 1000);
-      } else {
-        var remainingMinutes = (minutes > 50 ? 60 - minutes : 10);
-        var remainingSeconds = 60 - seconds;
+    window.onload = function() {
+      loadSettings();
+      loadSessionData();
+      startCountdown();
+      document.body.addEventListener('keydown', handleKeydown);
+    }
 
-        document.getElementById("timer").innerHTML = (remainingMinutes < 10 ? "0" : "") + remainingMinutes.toString() + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds.toString();
-        document.getElementById("status").innerHTML = "Istirahat";
-
-        setTimeout(startCountdown, 1000);
+    function handleKeydown(event) {
+      if (event.code === 'Space') {
+        if (isPaused) {
+          resumeCountdown();
+        } else {
+          pauseCountdown();
+        }
       }
+    }
+
+    function startCountdown() {
+      if (isPaused) return;
+      
+      let minutes = Math.floor(remainingTime / 60);
+      let seconds = remainingTime % 60;
+
+      document.getElementById("timer").innerHTML = (minutes < 10 ? "0" : "") + minutes.toString() + ":" + (seconds < 10 ? "0" : "") + seconds.toString();
+      document.getElementById("status").innerHTML = isStudyTime ? "Belajar" : "Istirahat";
+
+      let progressPercent = ((isStudyTime ? totalStudyTime : totalBreakTime) - remainingTime) / (isStudyTime ? totalStudyTime : totalBreakTime) * 100;
+      document.getElementById("progress-bar").style.width = progressPercent + "%";
+
+      if (remainingTime === 0) {
+        if (isStudyTime) {
+          sessionCounter++;
+          sessionsThisWeek++;
+          document.getElementById("sessionCounter").innerHTML = "Sessions Completed: " + sessionCounter;
+          document.getElementById("motivationQuote").innerHTML = quotes[Math.floor(Math.random() * quotes.length)];
+          updateStreak();
+        } else {
+          document.getElementById("breakSuggestion").innerHTML = breakSuggestions[Math.floor(Math.random() * breakSuggestions.length)];
+        }
+        isStudyTime = !isStudyTime;
+        remainingTime = isStudyTime ? totalStudyTime : totalBreakTime;
+        playSound();
+        alert(isStudyTime ? "Waktu Belajar Mulai!" : "Waktu Istirahat Mulai!");
+        saveSessionData();
+      } else {
+        remainingTime--;
+      }
+
+      setTimeout(startCountdown, 1000);
+    }
+
+    function playSound() {
+      let audio = new Audio('notification.mp3');
+      audio.volume = volume;
+      audio.play();
+    }
+
+    function pauseCountdown() {
+      isPaused = true;
+    }
+
+    function resumeCountdown() {
+      isPaused = false;
+      startCountdown();
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      saveSettings();
+    }
+
+    function setCustomTimes() {
+      studyMinutes = promptValidNumber("Enter study duration in minutes:", studyMinutes);
+      breakMinutes = promptValidNumber("Enter break duration in minutes:", breakMinutes);
+      totalStudyTime = studyMinutes * 60;
+      totalBreakTime = breakMinutes * 60;
+      remainingTime = isStudyTime ? totalStudyTime : totalBreakTime;
+      saveSettings();
+    }
+
+    function promptValidNumber(message, defaultValue) {
+      let value;
+      do {
+        value = parseInt(prompt(message, defaultValue));
+      } while (isNaN(value) || value <= 0);
+      return value;
+    }
+
+function addTask() {
+  let taskInput = document.getElementById("taskInput");
+  let task = taskInput.value;
+  if (task) {
+    let taskList = document.getElementById("taskList");
+    let listItem = document.createElement("li");
+
+    let taskText = document.createElement("span");
+    taskText.textContent = task;
+
+    let checkButton = document.createElement("button");
+    checkButton.textContent = "✔";
+    checkButton.style.marginLeft = "10px";
+    checkButton.addEventListener('click', function() {
+      taskList.removeChild(listItem);
+      saveTasks();
+    });
+
+    listItem.appendChild(taskText);
+    listItem.appendChild(checkButton);
+    taskList.appendChild(listItem);
+    taskInput.value = "";
+    saveTasks();
+  }
+}
+
+function saveTasks() {
+  let tasks = [];
+  let taskListItems = document.getElementById("taskList").getElementsByTagName("li");
+  for (let i = 0; i < taskListItems.length; i++) {
+    let listItem = taskListItems[i];
+    let task = {
+      text: listItem.getElementsByTagName("span")[0].textContent,
+    };
+    tasks.push(task);
+  }
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function loadTasks() {
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  let taskList = document.getElementById("taskList");
+  for (let i = 0; i < tasks.length; i++) {
+    let listItem = document.createElement("li");
+
+    let taskText = document.createElement("span");
+    taskText.textContent = tasks[i].text;
+
+    let checkButton = document.createElement("button");
+    checkButton.textContent = "✔";
+    checkButton.style.marginLeft = "10px";
+    checkButton.addEventListener('click', function() {
+      taskList.removeChild(listItem);
+      saveTasks();
+    });
+
+    listItem.appendChild(taskText);
+    listItem.appendChild(checkButton);
+    taskList.appendChild(listItem);
+  }
+}
+
+window.onload = function() {
+  loadSettings();
+  loadSessionData();
+  startCountdown();
+  loadTasks();
+  document.body.addEventListener('keydown', handleKeydown);
+}
+
+
+    function updateStreak() {
+      let lastStudyDate = localStorage.getItem("lastStudyDate");
+      let today = new Date().toLocaleDateString();
+      if (lastStudyDate !== today) {
+        streakCounter++;
+        localStorage.setItem("lastStudyDate", today);
+        document.getElementById("streakCounter").innerHTML = "Streak: " + streakCounter + " days";
+        saveSessionData();
+      }
+    }
+
+    function saveSessionData() {
+      localStorage.setItem("sessionCounter", sessionCounter);
+      localStorage.setItem("streakCounter", streakCounter);
+      localStorage.setItem("sessionsThisWeek", sessionsThisWeek);
+    }
+
+    function loadSessionData() {
+      sessionCounter = parseInt(localStorage.getItem("sessionCounter")) || 0;
+      streakCounter = parseInt(localStorage.getItem("streakCounter")) || 0;
+      sessionsThisWeek = parseInt(localStorage.getItem("sessionsThisWeek")) || 0;
+      document.getElementById("sessionCounter").innerHTML = "Sessions Completed: " + sessionCounter;
+      document.getElementById("streakCounter").innerHTML = "Streak: " + streakCounter + " days";
+    }
+
+    function saveSettings() {
+      localStorage.setItem("studyMinutes", studyMinutes);
+      localStorage.setItem("breakMinutes", breakMinutes);
+      localStorage.setItem("darkMode", document.body.classList.contains('dark-mode'));
+    }
+
+    function loadSettings() {
+      studyMinutes = parseInt(localStorage.getItem("studyMinutes")) || 50;
+      breakMinutes = parseInt(localStorage.getItem("breakMinutes")) || 10;
+      if (localStorage.getItem("darkMode") === 'true') {
+        document.body.classList.add('dark-mode');
+      }
+      totalStudyTime = studyMinutes * 60;
+      totalBreakTime = breakMinutes * 60;
+      remainingTime = totalStudyTime;
+    }
+
+    function setVolume() {
+      volume = parseFloat(prompt("Set volume (0.0 to 1.0):", volume));
+    }
+
+    function togglePomodoroMode() {
+      pomodoroMode = !pomodoroMode;
+      studyMinutes = pomodoroMode ? 25 : 50;
+      breakMinutes = pomodoroMode ? 5 : 10;
+      totalStudyTime = studyMinutes * 60;
+      totalBreakTime = breakMinutes * 60;
+      remainingTime = totalStudyTime;
+      document.getElementById("pomodoroStatus").innerHTML = pomodoroMode ? "Pomodoro Mode (25:5)" : "Standard Mode (50:10)";
+      saveSettings();
     }
   </script>
 </head>
-<body onload="startCountdown();">
+<body>
   <h1>Waktu Belajar dan Istirahat</h1>
   <div id="timer">50:00</div>
   <div id="status"><span class="label">Status:</span> <span class="value">Belajar</span></div>
+  <div class="progress">
+    <div id="progress-bar" class="progress-bar"></div>
+  </div>
+  <div id="sessionCounter">Sessions Completed: 0</div>
+  <div id="streakCounter">Streak: 0 days</div>
+  <div id="motivationQuote"></div>
+  <div id="breakSuggestion"></div>
+  <div class="task-list">
+    <input type="text" id="taskInput" placeholder="Enter a task">
+    <button onclick="addTask()">Add Task</button>
+    <ul id="taskList"></ul>
+  </div>
+  <div>
+    <button class="button" onclick="pauseCountdown()">Pause</button>
+    <button class="button" onclick="resumeCountdown()">Resume</button>
+    <button class="button" onclick="setCustomTimes()">Set Custom Times</button>
+    <button class="button" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <button class="button" onclick="setVolume()">Set Volume</button>
+    <button class="button" onclick="togglePomodoroMode()">Toggle Pomodoro Mode</button>
+    <div id="pomodoroStatus">Standard Mode (50:10)</div>
+  </div>
 </body>
 </html>
